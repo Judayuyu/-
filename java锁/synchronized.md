@@ -1,0 +1,174 @@
+### synchronized 
+
+* 对普通方法，锁的是当前对象
+
+* 对静态方法，锁的是这个Class
+
+* 对于同步块，锁的是**Synchronized**括号里配置的对象
+
+* 对象锁和class锁不冲突。实例同步方法获取对象锁时，静态同步方法仍然可以获取到锁
+
+```java
+ private synchronized void test1(){
+        try {
+            System.out.println("sleep :"+ new Date());
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted");
+            e.printStackTrace();
+        }
+    }
+   private static synchronized void test3(){
+        System.out.println("static start :"+ new Date());
+    }
+ public static void main(String[] args)  {
+        ThreadLocalTest threadLocalTest = new ThreadLocalTest();
+        new Thread(threadLocalTest::test1).start();
+     //即使test1中占着对象锁不释放，test3还是可以马上执行
+        new Thread(ThreadLocalTest::test3).start(); 
+    }
+```
+
+### 实现原理
+
+#### 1. 同步块实现原理
+
+底层用monitorenter和monitorexit两个指令来实现
+
+#### ![1573136521737](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573136521737.png)2. 同步方法实现原理
+
+* **java对象头的Mark Word字段，无锁时存的是hashcode等信息，有锁时存锁相关信息**
+
+<img src="C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573137155205.png" alt="1573137155205" style="zoom:150%;" />
+
+![1573137333220](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573137333220.png)
+
+![1573137367946](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573137367946.png)
+
+
+
+#### 3. 字节码如下
+
+![1573613538203](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573613538203.png)
+
+![1573614033636](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573614033636.png)
+
+![1573614050479](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573614050479.png)
+
+
+
+####  jdk1.6对Synchronized的优化，引入偏向锁和轻量级锁
+
+**Synchronized效率低的原因**
+
+如同我们在自旋锁中提到的“**阻塞或唤醒一个Java线程需要操作系统切换CPU状态来完成，这种状态转换需要耗费处理器时间。如果同步代码块中的内容过于简单，状态转换消耗的时间有可能比用户代码执行的时间还要长**”。这种方式就是synchronized最初实现同步的方式，这就是JDK 6之前synchronized效率低的原因。这种依赖于操作系统Mutex Lock所实现的锁我们称之为“重量级锁”，JDK 6中为了减少获得锁和释放锁带来的性能消耗，引入了“偏向锁”和“轻量级锁”。
+
+* **锁的级别：无锁状态  <  偏向锁  <  轻量级锁  < 重量级锁**
+
+* **锁只能升级不能降级，目的是为了提高获取锁和释放锁的效率**
+
+
+
+#### 偏向锁 
+
+![1573139349850](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573139349850.png)
+
+
+
+
+
+#### 偏向锁逻辑
+
+1.线程A第一次访问同步块时，先检测对象头Mark Word中的标志位是否为01，依此判断此时对象锁是否处于无所状态或者偏向锁状态（匿名偏向锁）；
+
+2.然后判断偏向锁标志位是否为1，如果不是，则进入轻量级锁逻辑（使用CAS竞争锁），如果是，则进入下一步流程；
+
+3.判断是偏向锁时，检查对象头Mark Word中记录的Thread Id是否是当前线程ID，如果是，则表明当前线程已经获得对象锁，以后该线程进入同步块时，不需要CAS进行加锁，只会往当前线程的栈中添加一条Displaced Mark Word为空的Lock Record中，用来统计重入的次数（如图为当对象所处于偏向锁时，当前线程重入3次，线程栈帧中Lock Record记录）。
+
+![img](https://pics4.baidu.com/feed/cdbf6c81800a19d82b4c04138bce2a8fa61e4616.jpeg?token=134eaee61d5c33a8768047a7d7093d98&s=08A07D33495FC5CE08DDA4DA000080B3)
+
+退出同步块释放偏向锁时，则依次删除对应Lock Record，但是不会修改对象头中的Thread Id；
+
+注：偏向锁撤销是指在获取偏向锁的过程中因不满足条件导致要将锁对象改为非偏向锁状态，而偏向锁释放是指退出同步块时的过程。
+
+4.如果对象头Mark Word中Thread Id不是当前线程ID，则进行CAS操作，企图将当前线程ID替换进Mark Word。如果当前对象锁状态处于匿名偏向锁状态（可偏向未锁定），则会替换成功（将Mark Word中的Thread id由匿名0改成当前线程ID，在当前线程栈中找到内存地址最高的可用Lock Record，将线程ID存入），获取到锁，执行同步代码块；
+
+5.如果对象锁已经被其他线程占用，则会替换失败，开始进行偏向锁撤销，这也是偏向锁的特点，一旦出现线程竞争，就会撤销偏向锁；
+
+6.偏向锁的撤销需要等待全局安全点（safe point，代表了一个状态，在该状态下所有线程都是暂停的）,暂停持有偏向锁的线程，检查持有偏向锁的线程状态（遍历当前JVM的所有线程，如果能找到，则说明偏向的线程还存活），如果线程还存活，则检查线程是否在执行同步代码块中的代码，如果是，则升级为轻量级锁，进行CAS竞争锁；
+
+注：每次进入同步块（即执行monitorenter）的时候都会以从高往低的顺序在栈中找到第一个可用的Lock Record，并设置偏向线程ID；每次解锁（即执行monitorexit）的时候都会从最低的一个Lock Record移除。所以如果能找到对应的Lock Record说明偏向的线程还在执行同步代码块中的代码。
+
+7.如果持有偏向锁的线程未存活，或者持有偏向锁的线程未在执行同步代码块中的代码，则进行校验是否允许重偏向，如果不允许重偏向，则撤销偏向锁，将Mark Word设置为无锁状态（未锁定不可偏向状态），然后升级为轻量级锁，进行CAS竞争锁；
+
+8.如果允许重偏向，设置为匿名偏向锁状态,CAS将偏向锁重新指向线程A（在对象头和线程栈帧的锁记录中存储当前线程ID）；
+
+9.唤醒暂停的线程，从安全点继续执行代码。
+
+以上便是偏向锁的整个逻辑了。
+
+#### 批量重偏向与批量撤销
+
+渊源：从偏向锁的加锁解锁过程中可看出，当只有一个线程反复进入同步块时，偏向锁带来的性能开销基本可以忽略，但是当有其他线程尝试获得锁时，就需要等到safe point时，再将偏向锁撤销为无锁状态或升级为轻量级，会消耗一定的性能，所以在多线程竞争频繁的情况下，偏向锁不仅不能提高性能，还会导致性能下降。于是，就有了批量重偏向与批量撤销的机制。
+
+**解决场景**批量重偏向（bulk rebias）机制是为了解决：一个线程创建了大量对象并执行了初始的同步操作，后来另一个线程也来将这些对象作为锁对象进行操作，这样会导致大量的偏向锁撤销操作。批量撤销（bulk revoke）机制是为了解决：在明显多线程竞争剧烈的场景下使用偏向锁是不合适的。
+
+**原理**以class为单位，为每个class维护一个偏向锁撤销计数器，每一次该class的对象发生偏向撤销操作时，该计数器+1，当这个值达到重偏向阈值（默认20）时，JVM就认为该class的偏向锁有问题，因此会进行批量重偏向。每个class对象会有一个对应的epoch字段，每个处于偏向锁状态对象的Mark Word中也有该字段，其初始值为创建该对象时class中的epoch的值。每次发生批量重偏向时，就将该值+1，同时遍历JVM中所有线程的栈，找到该class所有正处于加锁状态的偏向锁，将其epoch字段改为新值。下次获得锁时，发现当前对象的epoch值和class的epoch不相等，那就算当前已经偏向了其他线程，也不会执行撤销操作，而是直接通过CAS操作将其Mark Word的Thread Id 改成当前线程Id。当达到重偏向阈值后，假设该class计数器继续增长，当其达到批量撤销的阈值后（默认40），JVM就认为该class的使用场景存在多线程竞争，会标记该class为不可偏向，之后，对于该class的锁，直接走轻量级锁的逻辑。
+
+ 
+
+![1573140008703](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573140008703.png)
+
+![1573140037172](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573140037172.png)
+
+
+#### 偏向锁关闭
+
+偏向锁是默认开启的，而且开始时间一般是比应用程序启动慢几秒，如果不想有这个延迟，那么可以使用-XX:BiasedLockingStartUpDelay=0；
+如果不想要偏向锁，那么可以通过-XX:-UseBiasedLocking = false来设置；
+
+
+
+#### 轻量级锁
+
+当锁是偏向锁的时候，被另外的线程所访问，偏向锁就会升级为轻量级锁，其他线程会通过自旋的形式尝试获取锁，不会阻塞，从而提高性能。
+
+* 轻量级锁的加锁过程
+  1. 在当前栈中开辟用于存储锁记录的空间(Lock Record)，并将对象头的Mark Word复制过来
+  2. 用CAS将对象头中的Mark Word替换为指向Lock Record的指针, 并将Lock Record里的owner指针指向对象的Mark Word。如果成功则获得锁，并且对象Mark Word的锁标志位设置为“00”，表示此对象处于轻量级锁定状态。失败则自旋。
+
+* 轻量级锁的释放过程
+  1. 轻量级解锁时，会使用原子的CAS操作将Displaced Mark Word替换回到对象头。
+  2. 如果成功，则表示没有竞争发生。成功替换，等待下一个线程获取锁。
+  3. 如果失败，表示当前锁存在竞争（因为自旋失败的线程已经将对象头中的轻量级锁00改变为了10），锁就会膨胀成重量级锁。 此时释放锁则通过将Mark Word的栈指针设置为0，然后通知阻塞的线程
+     
+
+![1573351310321](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573351310321.png)
+
+
+
+**若当前只有一个等待线程，则该线程通过自旋进行等待。但是当自旋超过一定的次数，或者一个线程在持有锁，一个在自旋，又有第三个来访时，轻量级锁升级为重量级锁。**
+
+#### **重量级锁**
+
+升级为重量级锁时，锁标志的状态值变为“10”，此时Mark Word中存储的是指向重量级锁的指针，此时等待锁的线程都会进入阻塞状态。
+
+综上，偏向锁通过对比Mark Word解决加锁问题，避免执行CAS操作。而轻量级锁是通过用CAS操作和自旋来解决加锁问题，避免线程阻塞和唤醒而影响性能。重量级锁是将除了拥有锁的线程以外的线程都阻塞。
+
+整体的锁状态升级流程如下：
+
+![1573353298449](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573353298449.png)
+
+#### 锁不降级的好处
+
+![1573353020957](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573353020957.png)
+
+
+
+#### 参考链接
+
+ https://blog.csdn.net/qq_39487033/article/details/84261640  偏向锁
+
+https://tech.meituan.com/2018/11/15/java-lock.html java锁事
+
+https://baijiahao.baidu.com/s?id=1630535202760061296&wfr=spider&for=pc   
