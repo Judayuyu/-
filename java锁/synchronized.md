@@ -35,25 +35,25 @@
 
 底层用monitorenter和monitorexit两个指令来实现
 
-#### ![1573136521737](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573136521737.png)2. 同步方法实现原理
+#### ![1573136521737](D:\笔记\面试题\java锁\assets\1573136521737.png)2. 同步方法实现原理
 
 * **java对象头的Mark Word字段，无锁时存的是hashcode等信息，有锁时存锁相关信息**
 
-<img src="C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573137155205.png" alt="1573137155205" style="zoom:150%;" />
+<img src="D:\笔记\面试题\java锁\assets\1573137155205.png" alt="1573137155205" style="zoom:150%;" />
 
-![1573137333220](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573137333220.png)
+![1573137333220](D:\笔记\面试题\java锁\assets\1573137333220.png)
 
-![1573137367946](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573137367946.png)
+![1573137367946](D:\笔记\面试题\java锁\assets\1573137367946.png)
 
 
 
 #### 3. 字节码如下
 
-![1573613538203](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573613538203.png)
+![1573613538203](D:\笔记\面试题\java锁\assets\1573613538203.png)
 
-![1573614033636](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573614033636.png)
+![1573614033636](D:\笔记\面试题\java锁\assets\1573614033636.png)
 
-![1573614050479](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573614050479.png)
+![1573614050479](D:\笔记\面试题\java锁\assets\1573614050479.png)
 
 
 
@@ -71,7 +71,7 @@
 
 #### 偏向锁 
 
-![1573139349850](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573139349850.png)
+![1573139349850](D:\笔记\面试题\java锁\assets\1573139349850.png)
 
 
 
@@ -117,9 +117,9 @@
 
  
 
-![1573140008703](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573140008703.png)
+![1573140008703](D:\笔记\面试题\java锁\assets\1573140008703.png)
 
-![1573140037172](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573140037172.png)
+![1573140037172](D:\笔记\面试题\java锁\assets\1573140037172.png)
 
 
 #### 偏向锁关闭
@@ -143,7 +143,7 @@
   3. 如果失败，表示当前锁存在竞争（因为自旋失败的线程已经将对象头中的轻量级锁00改变为了10），锁就会膨胀成重量级锁。 此时释放锁则通过将Mark Word的栈指针设置为0，然后通知阻塞的线程
      
 
-![1573351310321](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573351310321.png)
+![1573351310321](D:\笔记\面试题\java锁\assets\1573351310321.png)
 
 
 
@@ -157,11 +157,11 @@
 
 整体的锁状态升级流程如下：
 
-![1573353298449](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573353298449.png)
+![1573353298449](D:\笔记\面试题\java锁\assets\1573353298449.png)
 
 #### 锁不降级的好处
 
-![1573353020957](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573353020957.png)
+![1573353020957](D:\笔记\面试题\java锁\assets\1573353020957.png)
 
 
 

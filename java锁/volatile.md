@@ -28,9 +28,9 @@ instance = new Singleton(); // instance是volatile变量
 
 #### 特性
 
-![1573400319167](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573400319167.png)
+![1573400319167](D:\笔记\面试题\java锁\assets\1573400319167.png)
 
-![1573400333367](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573400333367.png)
+![1573400333367](D:\笔记\面试题\java锁\assets\1573400333367.png)
 
 #### 总结
 
@@ -38,11 +38,11 @@ instance = new Singleton(); // instance是volatile变量
 
 2. 对volatile变量的写，happens-before 后面对该变量的读，并且禁止与后面的volatile读写重排序
 
-   ![1573567111700](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573567111700.png)
+   ![1573567111700](D:\笔记\面试题\java锁\assets\1573567111700.png)
 
 3. 对volatile变量的读，happens-before与对volatile变量的读写，并且禁止与普通的读写重排序
 
-![1573567096170](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573567096170.png)
+![1573567096170](D:\笔记\面试题\java锁\assets\1573567096170.png)
 
-![1574041080914](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1574041080914.png)
+![1574041080914](D:\笔记\面试题\java锁\assets\1574041080914.png)
 

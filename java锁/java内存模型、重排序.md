@@ -3,7 +3,7 @@
 1. 线程本地内存
 2. 共享变量存储在主内存
 
-![1573392525702](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573392525702.png)
+![1573392525702](D:\笔记\面试题\java锁\assets\1573392525702.png)
 
 #### 本地内存不可见引发的问题
 
@@ -12,11 +12,11 @@
 * 线程A将本地内存刷新到主内存
 * 线程B将本地内存刷新到主内存
 
-![1573393076864](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573393076864.png)
+![1573393076864](D:\笔记\面试题\java锁\assets\1573393076864.png)
 
 #### happens-before
 
-![1573485313075](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573485313075.png)
+![1573485313075](D:\笔记\面试题\java锁\assets\1573485313075.png)
 
 * happens-before用来阐述操作之间的可见性。如果A操作的**执行结果**需要对B操作可见，则
 
@@ -24,51 +24,51 @@
 
 #### as-if-serial
 
-![1573485106106](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573485106106.png)
+![1573485106106](D:\笔记\面试题\java锁\assets\1573485106106.png)
 
 #### 程序规则排序
 
-![1573396006985](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573396006985.png)
+![1573396006985](D:\笔记\面试题\java锁\assets\1573396006985.png)
 
 #### 重排序对多线程的影响
 
-![1573396758082](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573396758082.png)
+![1573396758082](D:\笔记\面试题\java锁\assets\1573396758082.png)
 
 #### 同步程序的顺序一致性效果
 
 * 临界区内可以重排序
 
-  ![1573397285276](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573397285276.png)
+  ![1573397285276](D:\笔记\面试题\java锁\assets\1573397285276.png)
 
 * 先执行writer，再执行reader 。  由于锁的是同一个实例，串行执行
 
-  ![1573397327236](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573397327236.png)
+  ![1573397327236](D:\笔记\面试题\java锁\assets\1573397327236.png)
 
-![1573397394832](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573397394832.png)
+![1573397394832](D:\笔记\面试题\java锁\assets\1573397394832.png)
 
-![1573397474777](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573397474777.png)
+![1573397474777](D:\笔记\面试题\java锁\assets\1573397474777.png)
 
-![1573397567879](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573397567879.png)
+![1573397567879](D:\笔记\面试题\java锁\assets\1573397567879.png)
 
 #### final域的内存语义
 
-![1573485397029](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573485397029.png)
+![1573485397029](D:\笔记\面试题\java锁\assets\1573485397029.png)
 
-![1573486197799](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573486197799.png)
+![1573486197799](D:\笔记\面试题\java锁\assets\1573486197799.png)
 
 #### 双重检查锁定
 
-![1573565788740](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573565788740.png)
+![1573565788740](D:\笔记\面试题\java锁\assets\1573565788740.png)
 
-![1573565807279](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573565807279.png)
+![1573565807279](D:\笔记\面试题\java锁\assets\1573565807279.png)
 
 ##### 1.问题的根源
 
-![1573565907680](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573565907680.png)
+![1573565907680](D:\笔记\面试题\java锁\assets\1573565907680.png)
 
-![1573566229815](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573566229815.png)
+![1573566229815](D:\笔记\面试题\java锁\assets\1573566229815.png)
 
-![1573566243130](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573566243130.png)
+![1573566243130](D:\笔记\面试题\java锁\assets\1573566243130.png)
 
 ##### 2.解决办法
 
@@ -78,15 +78,15 @@
 
    [volatile解决双重检查锁](https://www.cnblogs.com/goodAndyxublog/p/11356402.html )
 
-   ![1573567320523](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573567320523.png)
+   ![1573567320523](D:\笔记\面试题\java锁\assets\1573567320523.png)
 
 2. 基于类初始化
 
-   ![1573568841977](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573568841977.png)
+   ![1573568841977](D:\笔记\面试题\java锁\assets\1573568841977.png)
 
-![1573569125490](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573569125490.png)
+![1573569125490](D:\笔记\面试题\java锁\assets\1573569125490.png)
 
 #### JMM内存可见性的保证
 
-![1573568560294](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1573568560294.png)
+![1573568560294](D:\笔记\面试题\java锁\assets\1573568560294.png)
 
