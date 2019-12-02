@@ -2,11 +2,11 @@
 
 #### 1. bigint  8字节
 
-![1572675936727](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572675936727.png)
+![1572675936727](D:\笔记\面试题\java锁\assets\1572675936727.png)
 
 #### 2.MyISAM引擎，数据和索引文件分开（非聚集），MYI  索引文件    MYD 数据文件
 
-![1572675941720](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572675941720.png)
+![1572675941720](D:\笔记\面试题\java锁\assets\1572675941720.png)
 
 #### 3.InnoDB  聚集索引，索引和数据都在同一个文件（ind文件）
 
@@ -15,29 +15,29 @@
 * 为什么使用自增主键（减少树平衡的操作，提高效率）
 * 叶子节点间的指针（方便范围查找）
 
-![1572678749801](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572678749801.png)
+![1572678749801](D:\笔记\面试题\java锁\assets\1572678749801.png)
 
 * 叶子节点从左到右递增，并且有指针连接，范围查找效率高
 
-  ![1572679697295](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572679697295.png)
+  ![1572679697295](D:\笔记\面试题\java锁\assets\1572679697295.png)
 
   
 
 * 对比B树
 
-  ![1572679748638](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572679748638.png)
+  ![1572679748638](D:\笔记\面试题\java锁\assets\1572679748638.png)
 
-  ![1572679833449](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572679833449.png)
+  ![1572679833449](D:\笔记\面试题\java锁\assets\1572679833449.png)
 
   
 
 #### 4.hash索引的缺点，对范围查找支持很差
 
-![1572679510721](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572679510721.png)
+![1572679510721](D:\笔记\面试题\java锁\assets\1572679510721.png)
 
-![1572679563110](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572679563110.png)
+![1572679563110](D:\笔记\面试题\java锁\assets\1572679563110.png)
 
 #### 5. 联合索引
 
-![1572681813339](C:\Users\czd\AppData\Roaming\Typora\typora-user-images\1572681813339.png)
+![1572681813339](D:\笔记\面试题\java锁\assets\1572681813339.png)
 

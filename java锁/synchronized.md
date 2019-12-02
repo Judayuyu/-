@@ -49,6 +49,21 @@
 
 #### 3. 字节码如下
 
+```java
+   public class Synchronized {
+        public static void main(String[] args) {
+            synchronized (Synchronized.class) {
+            }
+            m();
+        }
+        public static synchronized void m() {
+        }
+    }
+
+```
+
+
+
 ![1573613538203](D:\笔记\面试题\java锁\assets\1573613538203.png)
 
 ![1573614033636](D:\笔记\面试题\java锁\assets\1573614033636.png)
