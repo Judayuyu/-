@@ -370,6 +370,12 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
         int ws = pred.waitStatus;
         if (ws == Node.SIGNAL)
             /*
+             * 如果当前节点获取同步状态失败，则会将前驱节点的
+             * waitStatus设为Node.SIGNAL。在释放同步状态时，
+             * 会检查当前的waitStatus，如果是Node.SIGNA则会
+             * unparkSuccessor。因此，如果前驱节点位Node.SIGNA，
+             * 则当前节点一定会被unpark。此时可以安全的park
+             *
              * This node has already set status asking a release
              * to signal it, so it can safely park.
              */
@@ -394,6 +400,33 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
             pred.compareAndSetWaitStatus(ws, Node.SIGNAL);
         }
         return false;
+    }
+//头节点
+ private void unparkSuccessor(Node node) {
+        /*
+         * If status is negative (i.e., possibly needing signal) try
+         * to clear in anticipation of signalling.  It is OK if this
+         * fails or if status is changed by waiting thread.
+         */
+        int ws = node.waitStatus;
+        if (ws < 0)
+            node.compareAndSetWaitStatus(ws, 0);
+
+        /*
+         * Thread to unpark is held in successor, which is normally
+         * just the next node.  But if cancelled or apparently null,
+         * traverse backwards from tail to find the actual
+         * non-cancelled successor.
+         */
+        Node s = node.next;
+        if (s == null || s.waitStatus > 0) {
+            s = null;
+            for (Node p = tail; p != node && p != null; p = p.prev)
+                if (p.waitStatus <= 0)
+                    s = p;
+        }
+        if (s != null)
+            LockSupport.unpark(s.thread);
     }
 ```
 
@@ -480,6 +513,8 @@ protected final boolean tryRelease(int releases) {
                         s = p;
                 }
             }
+            //第二个条件：防止头节点的next节点去获取的时候也被判定为有前驱节点，从而
+            //无法尝试获取锁
             if (s != null && s.thread != Thread.currentThread())
                 return true;
         }
