@@ -46,3 +46,24 @@ instance = new Singleton(); // instance是volatile变量
 
 ![1574041080914](D:\笔记\面试题\java锁\assets\1574041080914.png)
 
+#### Demo
+
+```java
+volatail static int number =0;
+main(){
+    new Thread(()->{
+        Thread.sleep(300)
+        num=1;
+    }).start();
+    
+    while(number==0){
+        
+    }
+    print("over")
+}
+```
+
+#### 原子性测试
+
+![image-20191219121541562](D:%5C%E7%AC%94%E8%AE%B0%5C%E9%9D%A2%E8%AF%95%E9%A2%98%5Cjava%E9%94%81%5Cassets%5Cimage-20191219121541562.png)
+

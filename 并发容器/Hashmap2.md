@@ -1,3 +1,5 @@
+ 
+
 # 解决hashMap线程不安全的方法
 
 ```java
@@ -206,13 +208,13 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
        
        对于newindex来说，要么跟index一样(当hash值高一位为0时)，要么是比原来的index前面多了一个1(多一个1即代表着多了length)
        
-       原来的index=0   length=2
+       原来的index=1   length=2
        扩容后
        newindex=3         newlength=4   
        或者
-       newindex=0         newlength=4
+       newindex=1         newlength=4
        
-       index=0的叫lohead
+       index=1的叫lohead
        index=3的叫hihead
        
                     01&10==0    11&10==1      
@@ -325,7 +327,9 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 * **HashMap在什么条件下扩容?**
 
-如果bucket满了(超过load factor*current capacity)，就要resize。 load factor为0.75，为了最大程度避免哈希冲突 current capacity为当前数组大小。
+如果需要往原来新增一个元素，新增后(超过load factor*current capacity)，就要resize。 load factor为0.75，为了最大程度避免哈希冲突 current capacity为当前数组大小。
+
+如果新增的元素index所对应的数组元素为null，则不需要resize
 
 * **那为什么是2的n次方呢？**
 
@@ -353,14 +357,14 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 - **知道hashmap中put元素的过程是什么样么?**
 
-   对key的hashCode()做hash运算，计算index; 如果没碰撞直接放到bucket里； 如果碰撞了，以链表的形式存在buckets后； 如果碰撞导致链表过长(大于等于TREEIFY_THRESHOLD)，就把链表转换成红黑树(JDK1.8中的改动)； 如果节点已经存在就替换old value(保证key的唯一性) 如果bucket满了(超过load factor*current capacity)，就要resize。 
+   对key的hashCode()做hash运算（对hashcode的高位与低位进行异或运算），计算index; 如果没碰撞直接放到bucket里； 如果碰撞了，以链表的形式存在buckets后； 如果碰撞导致链表过长(大于等于TREEIFY_THRESHOLD)，就把链表转换成红黑树(JDK1.8中的改动)； 如果节点已经存在就替换old value(保证key的唯一性) 如果bucket满了(超过load factor*current capacity)，就要resize。 
 
 - **知道hashmap中get元素的过程是什么样么？**
 
   ```java
   /*
   	直接通过hash值求出索引，获取table中对应的元素first。
-  	判断first是否为空，不为空判断hash值和equals或者==，如果成功则返回
+  	判断first是否为空，不为空判断hash值是否相等，相等判断key是否相等或者和equals，如果成功则返回
   	失败则判断是树还是链表，如果是链表则遍历first.next一致往下找O(n)
   	如果是树则是O(logn)
   */
@@ -473,7 +477,32 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
   一般用Integer、String这种不可变类当HashMap当key，而且String最为常用。
 
   - (1)因为字符串是不可变的，所以在它**创建的时候hashcode就被缓存了**（可变类的hashcode会随着对象值的改变而改变），不需要重新计算。这就使得字符串很适合作为Map中的键，字符串的处理速度要快过其它的键对象。这就是HashMap中的键往往都使用字符串。
+
   - (2)因为获取对象的时候要用到equals()和hashCode()方法，那么键对象正确的重写这两个方法是非常重要的,这些类已经很规范的覆写了hashCode()以及equals()方法。
+
+    ```java
+    //未重写hashcode
+     HashMap<Test, String> map = new HashMap<>();
+            Test test = new Test(1);
+            map.put(test,"1");
+            System.out.println(map.get(test));//输出1
+            test.set(2);
+            System.out.println(map.get(test));//输出1
+    //Test类重写hashcode
+      @Override
+        public int hashCode() {
+            return i;
+        }
+    
+    HashMap<Test, String> map = new HashMap<>();
+            Test test = new Test(1);
+            map.put(test,"1");
+            System.out.println(map.get(test));//1
+            test.set(2);
+            System.out.println(map.get(test));//null
+    ```
+
+    
 
 - **我用可变类当HashMap的key有什么问题?**
 
@@ -487,14 +516,14 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
   changeMap.put(list, objectValue);
   System.out.println(changeMap.get(list));
   list.add("hello world");//hashcode发生了改变
-  System.out.println(changeMap.get(list));
+  System.out.println(changeMap.get(list));//null  ArrayList重写了hashcode方法
   ```
 
 - **如果让你实现一个自定义的class作为HashMap的key该如何实现？**
 
   此题考察两个知识点
 
-  - 重写hashcode和equals方法注意什么?
+  - 重写hashcode和equals方法注意什么? 
   - 如何设计一个不变类
   
 
@@ -516,7 +545,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 (3)不提供改变成员变量的方法，包括setter 避免通过其他接口改变成员变量的值，破坏不可变特性。
 
-(4)通过构造器初始化所有成员，进行深拷贝(deep copy) 如果构造器传入的对象直接赋值给成员变量，还是可以通过对传入对象的修改进而导致改变内部变量的值。例如：
+(4)通过构造器初始化所有成员，进行**深拷贝(deep copy)** 如果构造器传入的对象直接赋值给成员变量，还是可以通过对传入对象的修改进而导致改变内部变量的值。例如：
 
 ```text
 public final class ImmutableDemo {  
@@ -548,7 +577,40 @@ HashMap 参考其他问题；
 
 LinkedHashMap 保存了记录的插入顺序，在用 Iterator 遍历时，先取到的记录肯定是先插入的；遍历比 HashMap 慢；
 
+![image-20191218104805234](D:%5C%E7%AC%94%E8%AE%B0%5C%E9%9D%A2%E8%AF%95%E9%A2%98%5Cjava%E9%94%81%5Cassets%5Cimage-20191218104805234.png)
+
+```java
+//在hashMap节点的基础上，加了before、和after两个引用，指向前一个插入的节点和后一个节点
+static class Entry<K,V> extends HashMap.Node<K,V> {
+        Entry<K,V> before, after;
+        Entry(int hash, K key, V value, Node<K,V> next) {
+            super(hash, key, value, next);
+        }
+    }
+//重写get方法，afterNodeAccess()方法将被访问的元素移动至双向链表的尾部
+public V get(Object key) {
+        Node<K,V> e;
+        if ((e = getNode(hash(key), key)) == null)
+            return null;	
+        if (accessOrder)
+            afterNodeAccess(e);
+        return e.value;
+    }
+//put之后将节点添加到双向链表的尾部
+
+```
+
+
+
 TreeMap 实现 SortMap 接口，能够把它保存的记录根据键排序（默认按键值升序排序，也可以指定排序的比较器）
+
+由于底层是红黑树，那么时间复杂度可以保证为log(n)
+
+**TreeMap key不能为null，为null为抛出NullPointException的**
+
+想要自定义比较，在构造方法中传入Comparator对象，否则使用key的自然排序来进行比较
+
+TreeMap非同步的，想要同步可以使用Collections来进行封装
 
 ### **8.HashMap & TreeMap & LinkedHashMap 使用场景？**
 

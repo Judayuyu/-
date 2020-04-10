@@ -1,0 +1,13 @@
+![image-20200407153928516](D:%5C%E7%AC%94%E8%AE%B0%5C%E9%9D%A2%E8%AF%95%E9%A2%98%5Cjava%E9%94%81%5Cassets%5Cimage-20200407153928516.png)
+
+#### 反向代理，一个站点多个域名
+
+ip相同，但是配置了两个server，每个server的server_name不同
+
+![image-20200407160431857](D:%5C%E7%AC%94%E8%AE%B0%5C%E9%9D%A2%E8%AF%95%E9%A2%98%5Cjava%E9%94%81%5Cassets%5Cimage-20200407160431857.png)
+
+![image-20200407161158859](D:%5C%E7%AC%94%E8%AE%B0%5C%E9%9D%A2%E8%AF%95%E9%A2%98%5Cjava%E9%94%81%5Cassets%5Cimage-20200407161158859.png)
+
+#### 负载均衡，一个upStream里多个server
+
+![image-20200407164013756](D:%5C%E7%AC%94%E8%AE%B0%5C%E9%9D%A2%E8%AF%95%E9%A2%98%5Cjava%E9%94%81%5Cassets%5Cimage-20200407164013756.png)
